@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/alasql@0.5"></script>
+    <script  src="metamap.js"></script>
+    <script  src="usersClass.js"></script>
+</head>
+<body>
+
+<p>Hello World !</p>
+
+</body>
+
+<script>
+    
+	alasql('CREATE TABLE countries ( country_id number PRIMARY KEY, country_name string)');
+    alasql("CREATE TABLE cities (country_id number REFERENCES countries(country_id), city_id number PRIMARY KEY, city_name string, people number)");
+
+	alasql("INSERT INTO countries VALUES (1, 'Poland'), (2, 'UK'), (3, 'Germany')");
+    alasql("INSERT INTO cities VALUES (1, 1, 'Krakow', 350000), (1, 2, 'Warszawa', 500000)");
+    alasql("INSERT INTO cities VALUES (2, 3, 'London', 3000000), (2, 4, 'Reading', 250000)");
+    alasql("INSERT INTO cities VALUES (3, 5, 'Berlin', 2000000), (3, 6, 'Munich', 500000)");
+
+
+	var queryResult1 = alasql("SELECT * FROM countries NATURAL JOIN cities");
+   
+   // queryResults now contains this array of objects
+    console.log(queryResult1);
+
+
+    // // TESTING ONE TO ONE RELATION
+    var city7 = new City(4, 7, 'New York', 8000000);
+    var city8 = new City(4, 8, 'Chicago', 3500000);
+    var city9 = new City(4, 9, 'San Francisco', 2000000);
+    var citiesOfUSA = new Array();
+    citiesOfUSA.push(city7);
+    citiesOfUSA.push(city8);
+    citiesOfUSA.push(city9);
+    var countryUSA = new Country(4, 'USA', citiesOfUSA);
+
+    // configure meta data for fields and columns
+    var countriesDataMap = new MetaDataMap('Country', 'countries');
+    countriesDataMap.addColumn(new ColumnMap('id', 'country_id'));
+    countriesDataMap.addColumn(new ColumnMap('name', 'country_name'));
+
+
+    var citiesDataMap = new MetaDataMap('City', 'cities');
+    citiesDataMap.addColumn(new ColumnMap('countryId', 'country_id'));
+    citiesDataMap.addColumn(new ColumnMap('cityId', 'city_id'));
+    citiesDataMap.addColumn(new ColumnMap('name', 'city_name'));
+    citiesDataMap.addColumn(new ColumnMap('numberOfPeople', 'people'));
+
+    // configure meta data for relations
+    countriesDataMap.addRelation(new Relation('OneToMany', 'cities', 'City', 'countryId', 'id'));
+
+    // create new DataMapper
+    var dataMapper = new DataMapper();
+    // register MetaDataMapping objects
+    dataMapper.registerMetaDataMap("Country", countriesDataMap);
+    dataMapper.registerMetaDataMap("City", citiesDataMap);
+    // save object in DB
+    dataMapper.save(countryUSA);
+
+ 
+    var result3 = alasql("SELECT * FROM countries NATURAL JOIN cities");
+    console.log(result3);
+
+    // get all countires with their cities from DB
+    // allStudentsWithCards = dataMapper.getAll("Student");
+    // console.log('All students with their cards: ');
+    // console.log(allStudentsWithCards);
+
+    // var qo1 = new QueryObject();
+    // qo1.setMetaDataMapping(studentDataMap);
+    // qo1.addCriteria(new Criteria('=', 'name', 'Dominik'));
+    
+    // // get specific student from DB
+    // var specificStudent1 = dataMapper.getByCriteria("Student", qo1);
+    // console.log(specificStudent1);
+
+
+    // var queryResult2 = alasql("SELECT * FROM people WHERE person_age < 50 ORDER BY person_age DESC");
+    // console.log(queryResult2);
+    
+</script>
+
+</html>

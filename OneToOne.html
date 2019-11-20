@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/alasql@0.5"></script>
+    <script  src="metamap.js"></script>
+    <script  src="usersClass.js"></script>
+</head>
+<body>
+
+<p>Hello World !</p>
+
+</body>
+
+<script>
+    
+	alasql('CREATE TABLE students ( student_id number PRIMARY KEY, student_name string, student_surname string, student_age number)');
+    alasql("CREATE TABLE cards (student_id number REFERENCES students(student_id), student_number number, student_faculty string)");
+
+
+	alasql("INSERT INTO students VALUES (1, 'Dominik', 'Wrobel', 23), (2, 'Franek', 'Kopytko', 25), (3, 'Zosia', 'Sosna', 20)");
+    alasql("INSERT INTO cards VALUES (1, 228512, 'EAIiB'), (2, 245621, 'WIET'), (3, 256123, 'WIMiR')");
+
+	var queryResult1 = alasql("SELECT * FROM students NATURAL JOIN cards");
+   
+   // queryResults now contains this array of objects
+    console.log(queryResult1);
+
+
+    // TESTING ONE TO ONE RELATION
+    var student4Card = new StudentCard(4, 212312, 'WIMIP' )
+    var student4 = new Student(4, 'Mirek', 'Misiak', 26, student4Card);
+    
+    // configure meta data for fields and columns
+    var studentDataMap = new MetaDataMap('Student', 'students');
+    studentDataMap.addColumn(new ColumnMap('id', 'student_id'));
+    studentDataMap.addColumn(new ColumnMap('name', 'student_name'));
+    studentDataMap.addColumn(new ColumnMap('surname', 'student_surname'));
+    studentDataMap.addColumn(new ColumnMap('age', 'student_age'));
+
+    var cardsDataMap = new MetaDataMap('StudentCard', 'cards');
+    cardsDataMap.addColumn(new ColumnMap('studentId', 'student_id'));
+    cardsDataMap.addColumn(new ColumnMap('studentNumber', 'student_number'));
+    cardsDataMap.addColumn(new ColumnMap('faculty', 'student_faculty'));
+
+    // configure meta data for relations
+    studentDataMap.addRelation(new Relation('OneToOne', 'studentCard', 'StudentCard', 'studentId', 'id'));
+
+    // create new DataMapper
+    var dataMapper = new DataMapper();
+    // register MetaDataMapping objects
+    dataMapper.registerMetaDataMap("Student", studentDataMap);
+    dataMapper.registerMetaDataMap("StudentCard", cardsDataMap);
+    // save object in DB
+    dataMapper.save(student4);
+
+    var result1 = alasql("SELECT * FROM students");
+    var result2 = alasql("SELECT * FROM cards");
+    var result3 = alasql("SELECT * FROM students NATURAL JOIN cards");
+    console.log(result1);
+    console.log(result2);
+    console.log(result3);
+
+    // get all students with their cards from DB
+    allStudentsWithCards = dataMapper.getAll("Student");
+    console.log('All students with their cards: ');
+    console.log(allStudentsWithCards);
+
+    var qo1 = new QueryObject();
+    qo1.setMetaDataMapping(studentDataMap);
+    qo1.addCriteria(new Criteria('=', 'name', 'Dominik'));
+    
+    // get specific student from DB
+    var specificStudent1 = dataMapper.getByCriteria("Student", qo1);
+    console.log(specificStudent1);
+
+
+    // var queryResult2 = alasql("SELECT * FROM people WHERE person_age < 50 ORDER BY person_age DESC");
+    // console.log(queryResult2);
+    
+</script>
+
+</html>

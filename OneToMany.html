@@ -59,30 +59,49 @@
     // register MetaDataMapping objects
     dataMapper.registerMetaDataMap("Country", countriesDataMap);
     dataMapper.registerMetaDataMap("City", citiesDataMap);
-    // save object in DB
+    
+    
+    // ^*^*^* save object in DB
     dataMapper.save(countryUSA);
-
- 
+    
     var result3 = alasql("SELECT * FROM countries NATURAL JOIN cities");
     console.log(result3);
 
-    // get all countires with their cities from DB
-    // allStudentsWithCards = dataMapper.getAll("Student");
-    // console.log('All students with their cards: ');
-    // console.log(allStudentsWithCards);
+    // ^*^*^* get all countires with their cities from DB
+    allCountriesWithCities = dataMapper.getAll("Country");
+    console.log('All countires with their cities: ');
+    console.log(allCountriesWithCities);
 
-    // var qo1 = new QueryObject();
-    // qo1.setMetaDataMapping(studentDataMap);
-    // qo1.addCriteria(new Criteria('=', 'name', 'Dominik'));
+
+    // ^*^*^* get specific countries from DB
+    var qo1 = new QueryObject();
+    qo1.setMetaDataMapping(countriesDataMap);
+    qo1.addCriteria(new Criteria('LIKE', 'name', 'U%'));
     
-    // // get specific student from DB
-    // var specificStudent1 = dataMapper.getByCriteria("Student", qo1);
-    // console.log(specificStudent1);
+    var specificCountries = dataMapper.getByCriteria("Country", qo1);
+    console.log(specificCountries);
 
 
-    // var queryResult2 = alasql("SELECT * FROM people WHERE person_age < 50 ORDER BY person_age DESC");
-    // console.log(queryResult2);
+    // ^*^*^* update 
+    var qo2 = new QueryObject();
+    qo2.setMetaDataMapping(citiesDataMap);
+    qo2.addCriteria(new Criteria('=', 'countryId', 1));
+    dataMapper.update("City", qo2, ['numberOfPeople'], [1000000]);
     
+    var updateResult = dataMapper.getByCriteria("City", qo2);
+    console.log(updateResult);
+
+
+    // ^*^*^* delete
+    var qo3 = new QueryObject();
+    qo3.setMetaDataMapping(citiesDataMap);
+    qo3.addCriteria(new Criteria('LIKE', 'name', 'W%'));
+    dataMapper.delete("City", qo3);
+    
+    var deleteResult = dataMapper.getByCriteria("City", qo2);
+    console.log(deleteResult);
+
+
 </script>
 
 </html>

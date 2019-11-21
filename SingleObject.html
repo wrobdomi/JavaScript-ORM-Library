@@ -40,25 +40,44 @@
     var dataMapper = new DataMapper();
     // register MetaDataMapping object
     dataMapper.registerMetaDataMap("Person", personDataMap);
-    // save object in DB
+    
+    
+    // ^*^*^* save object in DB
     dataMapper.save(person1);
-    // get all people from DB
+    
+    
+    // ^*^*^* get all people from DB
     allPeople1 = dataMapper.getAll("Person");
     console.log(allPeople1);
 
+
+    // ^*^*^* get specific person from DB
     var qo1 = new QueryObject();
     qo1.setMetaDataMapping(personDataMap);
     qo1.addCriteria(new Criteria('=', 'name', 'John'));
     qo1.addCriteria(new Criteria('<', 'age', 50));
     
-    // get specific person from DB
     var specificPeople1 = dataMapper.getByCriteria("Person", qo1);
     console.log(specificPeople1);
 
-
-    // var queryResult2 = alasql("SELECT * FROM people WHERE person_age < 50 ORDER BY person_age DESC");
-    // console.log(queryResult2);
+    // ^*^*^* update 
+    var qo2 = new QueryObject();
+    qo2.setMetaDataMapping(personDataMap);
+    qo2.addCriteria(new Criteria('LIKE', 'name', 'J%'));
+    dataMapper.update("Person", qo2, ['age'], [20]);
     
+    var updateResult = dataMapper.getByCriteria("Person", qo2);
+    console.log(updateResult);
+
+    // ^*^*^* delete
+    var qo3 = new QueryObject();
+    qo3.setMetaDataMapping(personDataMap);
+    qo3.addCriteria(new Criteria('LIKE', 'name', 'N%'));
+    dataMapper.delete("Person", qo3);
+    
+    var deleteResult = dataMapper.getAll("Person");
+    console.log(deleteResult);
+
 </script>
 
 </html>

@@ -51,7 +51,9 @@
     // register MetaDataMapping objects
     dataMapper.registerMetaDataMap("Student", studentDataMap);
     dataMapper.registerMetaDataMap("StudentCard", cardsDataMap);
-    // save object in DB
+    
+    
+    // ^*^*^* save object in DB
     dataMapper.save(student4);
 
     var result1 = alasql("SELECT * FROM students");
@@ -61,22 +63,39 @@
     console.log(result2);
     console.log(result3);
 
-    // get all students with their cards from DB
+
+    // ^*^*^* get all students with their cards from DB
     allStudentsWithCards = dataMapper.getAll("Student");
     console.log('All students with their cards: ');
     console.log(allStudentsWithCards);
 
+    // ^*^*^* get specific student from DB
     var qo1 = new QueryObject();
     qo1.setMetaDataMapping(studentDataMap);
     qo1.addCriteria(new Criteria('=', 'name', 'Dominik'));
     
-    // get specific student from DB
     var specificStudent1 = dataMapper.getByCriteria("Student", qo1);
     console.log(specificStudent1);
 
 
-    // var queryResult2 = alasql("SELECT * FROM people WHERE person_age < 50 ORDER BY person_age DESC");
-    // console.log(queryResult2);
+    // ^*^*^* update 
+    var qo2 = new QueryObject();
+    qo2.setMetaDataMapping(cardsDataMap);
+    qo2.addCriteria(new Criteria('=', 'studentNumber', 228512));
+    dataMapper.update("StudentCard", qo2, ['faculty'], ['WIET']);
+    
+    var updateResult = dataMapper.getByCriteria("StudentCard", qo2);
+    console.log(updateResult);
+
+    // ^*^*^* delete
+    var qo3 = new QueryObject();
+    qo3.setMetaDataMapping(cardsDataMap);
+    qo3.addCriteria(new Criteria('>', 'studentNumber', 228512));
+    dataMapper.delete("StudentCard", qo3);
+    
+    var deleteResult = dataMapper.getAll("StudentCard");
+    console.log(deleteResult);
+
     
 </script>
 

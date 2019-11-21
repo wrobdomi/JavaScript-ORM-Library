@@ -156,6 +156,25 @@ class DataMapper{
                     }
                 }
 
+                if(singleRelation.relationType === 'OneToMany'){
+                    let allRelationObjects = new Array();    
+                    allRelationObjects = this.getAll(singleRelation.className);
+                    for(let j of allClassObjects) {
+                        for(let i of allRelationObjects) {
+                            if(i[singleRelation.foreignKeyField] === j[singleRelation.primaryKeyField]){
+                                console.log('Single relatio field name is ' + singleRelation.fieldName);
+                                
+                                if(Array.isArray(j[singleRelation.fieldName])){
+                                    j[singleRelation.fieldName].push(i);
+                                } else{
+                                    j[singleRelation.fieldName] = new Array();
+                                    j[singleRelation.fieldName].push(i);
+                                }     
+                            }
+                        }
+                    }
+                }
+
 
              }
          }
@@ -201,6 +220,25 @@ class DataMapper{
                     }
                 }
 
+                if(singleRelation.relationType === 'OneToMany'){
+                    let allRelationObjects = new Array();    
+                    allRelationObjects = this.getAll(singleRelation.className);
+                    for(let j of allClassObjects) {
+                        for(let i of allRelationObjects) {
+                            if(i[singleRelation.foreignKeyField] === j[singleRelation.primaryKeyField]){
+                                console.log('Single relatio field name is ' + singleRelation.fieldName);
+                                
+                                if(Array.isArray(j[singleRelation.fieldName])){
+                                    j[singleRelation.fieldName].push(i);
+                                } else{
+                                    j[singleRelation.fieldName] = new Array();
+                                    j[singleRelation.fieldName].push(i);
+                                }     
+                            }
+                        }
+                    }
+                }
+
 
              }
          }
@@ -209,12 +247,56 @@ class DataMapper{
         return allClassObjects;
     }
 
-    update(className, queryObject){
+    update(className, queryObject, setFieldsArray, setValuesArray){
+        const metaDataMapper = this.map.get(className);
+        let qb = new QueryBuilder();
+        qb.appendFragment('UPDATE ');
+        qb.appendFragment(metaDataMapper.tableName);
+        qb.appendFragment(' SET ');
+        for(let i = 0; i < setFieldsArray.length; i++){
 
+            for (let j = 0; j < metaDataMapper.columnsMaps.length; j++) {
+                if(setFieldsArray[i] === metaDataMapper.columnsMaps[j].propertyName){
+
+                    qb.appendFragment(metaDataMapper.columnsMaps[j].columnName);
+                    qb.appendFragment(' = ');
+                    
+                    if (typeof setValuesArray[i] === 'string' || setValuesArray[i] instanceof String) {
+                        qb.appendFragment("'");
+                        qb.appendFragment(setValuesArray[i]);
+                        qb.appendFragment("'");
+                    }else {
+                        qb.appendFragment(setValuesArray[i]);
+                    }
+
+                    if(i === setFieldsArray.length - 1){
+                        qb.appendFragment(' ');
+                    }
+                    else{
+                        qb.appendFragment(', ');
+                    }
+
+                }
+           
+            } 
+        }
+
+        qb.appendFragment(queryObject.getSpecificQuery())
+        let dbQuery = qb.getFullQuery();
+        console.log(qb.getFullQuery());
+        alasql(dbQuery);
     }
 
     delete(className, queryObject){
-
+        const metaDataMapper = this.map.get(className);
+        let qb = new QueryBuilder();
+        qb.appendFragment('DELETE FROM ');
+        qb.appendFragment(metaDataMapper.tableName);
+        qb.appendFragment('  ');
+        qb.appendFragment(queryObject.getSpecificQuery())
+        let dbQuery = qb.getFullQuery();
+        console.log(qb.getFullQuery());
+        alasql(dbQuery);
     }
 
 }
@@ -269,6 +351,7 @@ class QueryObject {
     }
 }
 
+
 class Criteria {
     constructor(operator, classField, value){
         this.operator = operator;
@@ -276,7 +359,6 @@ class Criteria {
         this.value = value;
     }
 }
-
 
 
 // Helper class - Builder design pattern

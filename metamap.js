@@ -1,10 +1,12 @@
-// Metadata mapping classes - DataMap design pattern
+var logColor = 'color: #701ce6; font-size: 16px;';
+
+// Metadata mapping classes - [DataMap design pattern] ------------------------------------ //
 class MetaDataMap {
     constructor(className, tableName){
-        this.className = className;
-        this.tableName = tableName;
-        this.columnsMaps = new Array();
-        this.relations = new Array();
+        this.className = className;     // name of the class
+        this.tableName = tableName;     // table for the class
+        this.columnsMaps = new Array(); // field -> column mapping
+        this.relations = new Array();   // relation to other tables
     }
 
     addColumn(col){
@@ -15,6 +17,7 @@ class MetaDataMap {
         this.relations.push(rel);
     }
 
+    // get column name for a passed field of the class
     getTableFieldName(classFieldName) {
         for(let cm of this.columnsMaps){
             if(cm.propertyName === classFieldName){
@@ -24,40 +27,79 @@ class MetaDataMap {
 
         return 'Error MetaDataMap: Mapping not found';
     }
-
 }
 
 // Metadata mapping classes - ColumnMap
 class ColumnMap {
-    constructor(propertyName, columnName){
-        this.propertyName = propertyName;
-        this.columnName = columnName
+    constructor(propertyName, columnName, dbType) {
+        this.propertyName = propertyName;   // class field name 
+        this.columnName = columnName;       // db column name for the field     
+        this.dbType = dbType;               // db type
     }
 }
 
 // Table relations
 class Relation {
     constructor(rType, fieldName, className, foreignKeyField, primaryKeyField){
-        this.relationType = rType; // OneToMany or ManyToMany
-        this.fieldName = fieldName; // The field that contains object or many objects from other table
-        this.className = className; // name of the class of from other table
+        this.relationType = rType;              // 'OneToMany' or 'ManyToMany'
+        this.fieldName = fieldName;             // The field that contains object or many objects from other table
+        this.className = className;             // name of the class from other table
         this.foreignKeyField = foreignKeyField; // name of the class field which is foreign key (from the other class) 
         this.primaryKeyField = primaryKeyField; // name of the class field which is primary key (from this class)
     }
 }
 
+// --------------------------------------------------------------------------------------- //
 
-// Transfering data class - DataMapper design pattern
-class DataMapper{
-    constructor(){
+
+
+
+// Transfering data class - [DataMapper design pattern] ---------------------------------- //
+class DataMapper {
+
+    constructor() {
         this.map = new Map();
     }
 
-    registerMetaDataMap(className, metaDataMap){
+    registerMetaDataMap(className, metaDataMap) {
         this.map.set(className, metaDataMap);
+        this.createTable(metaDataMap);
     }
 
-    save(classObject){
+
+    createTable(metaDataMap) {
+        
+        // alasql("CREATE TABLE people (person_id number, person_name string, person_age number)");
+
+        let qb = new QueryBuilder();
+        qb.appendFragment('CREATE TABLE ');
+        qb.appendFragment(metaDataMap.tableName);
+        qb.appendFragment(' (');
+
+        for (let i = 0; i < metaDataMap.columnsMaps.length; i++) {
+
+            qb.appendFragment(metaDataMap.columnsMaps[i].columnName);
+            qb.appendFragment(' ');
+            qb.appendFragment(metaDataMap.columnsMaps[i].dbType);
+
+            if(i === metaDataMap.columnsMaps.length-1){
+                qb.appendFragment(')');
+            } else {
+                qb.appendFragment(', ');
+            }
+        } 
+
+        // console.log(qb.getFullQuery());
+        var dbSuccess = alasql(qb.getFullQuery());
+        console.log('%c LIBRARY-LOG: Library creates new table by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
+        console.log('%c LIBRARY-LOG: with result: ' + dbSuccess, logColor);
+
+    }
+
+
+    save(classObject) {
+
         const metaDataMapper = this.map.get(classObject.constructor.name);
         let qb = new QueryBuilder();
         qb.appendFragment('INSERT INTO ');
@@ -90,8 +132,11 @@ class DataMapper{
             }
         } 
         
-        console.log(qb.getFullQuery());
+
         var dbSuccess = alasql(qb.getFullQuery());
+        console.log('%c LIBRARY-LOG: Library saves object by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
+        console.log('%c LIBRARY-LOG: with result: ' + dbSuccess, logColor);
 
         // if relations array exist and is not empty
         if(Array.isArray(metaDataMapper.relations) && metaDataMapper.relations.length){
@@ -111,24 +156,24 @@ class DataMapper{
 
             }
 
-
-
         }
-
-        console.log(dbSuccess);
 
     }
 
-    getAll(className){
+    getAll(className) {
         const metaDataMapper = this.map.get(className);
         let qb = new QueryBuilder();
         qb.appendFragment('SELECT * FROM ');
         qb.appendFragment(this.map.get(className).tableName);
-        console.log(qb.getFullQuery());
 
+     
         let dbClassObjects = alasql(qb.getFullQuery());
-        console.log(dbClassObjects);
-        
+
+        console.log('%c LIBRARY-LOG: Library gets all data from table by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
+        // console.log('%c LIBRARY-LOG: with result: ' + dbClassObjects, logColor);
+        console.log('%c LIBRARY-LOG: library converts data to class objects... ', logColor);
+
         let allClassObjects = new Array();
         
         for(let dbObject of dbClassObjects){
@@ -182,16 +227,19 @@ class DataMapper{
         return allClassObjects;
     }
 
-    getByCriteria(className, queryObject){
+    getByCriteria(className, queryObject) {
         const metaDataMapper = this.map.get(className);
         let qb = new QueryBuilder();
         qb.appendFragment('SELECT * FROM ');
         qb.appendFragment(this.map.get(className).tableName);
-        qb.appendFragment(queryObject.getSpecificQuery())
-        console.log(qb.getFullQuery());
+        qb.appendFragment(queryObject.getSpecificQuery());
 
         let dbClassObjects = alasql(qb.getFullQuery());
-        console.log(dbClassObjects);
+     
+        console.log('%c LIBRARY-LOG: Library gets all data from table by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
+        // console.log('%c LIBRARY-LOG: with result: ' + dbClassObjects, logColor);
+        console.log('%c LIBRARY-LOG: library converts data to class objects... ', logColor);
         
         let allClassObjects = new Array();
         
@@ -247,7 +295,7 @@ class DataMapper{
         return allClassObjects;
     }
 
-    update(className, queryObject, setFieldsArray, setValuesArray){
+    update(className, queryObject, setFieldsArray, setValuesArray) {
         const metaDataMapper = this.map.get(className);
         let qb = new QueryBuilder();
         qb.appendFragment('UPDATE ');
@@ -283,11 +331,13 @@ class DataMapper{
 
         qb.appendFragment(queryObject.getSpecificQuery())
         let dbQuery = qb.getFullQuery();
-        console.log(qb.getFullQuery());
         alasql(dbQuery);
+
+        console.log('%c LIBRARY-LOG: Library updates record by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
     }
 
-    delete(className, queryObject){
+    delete(className, queryObject) {
         const metaDataMapper = this.map.get(className);
         let qb = new QueryBuilder();
         qb.appendFragment('DELETE FROM ');
@@ -295,14 +345,20 @@ class DataMapper{
         qb.appendFragment('  ');
         qb.appendFragment(queryObject.getSpecificQuery())
         let dbQuery = qb.getFullQuery();
-        console.log(qb.getFullQuery());
         alasql(dbQuery);
+
+        console.log('%c LIBRARY-LOG: Library deletes record by executing:', logColor);
+        console.log('%c LIBRARY-LOG: ' + qb.getFullQuery(), logColor);
     }
 
 }
+// ------------------------------------------------------------------------------------- //
 
 
-// Specify query - QueryObject design pattern
+
+
+
+// Specify query - [QueryObject design pattern] --------------------------------------------- //
 class QueryObject {
     constructor(){
         this.metaDataMapObject = null;
@@ -351,7 +407,6 @@ class QueryObject {
     }
 }
 
-
 class Criteria {
     constructor(operator, classField, value){
         this.operator = operator;
@@ -359,9 +414,13 @@ class Criteria {
         this.value = value;
     }
 }
+// ------------------------------------------------------------------------------------- //
 
 
-// Helper class - Builder design pattern
+
+
+
+// Helper class - [Builder design pattern] ---------------------------------------------- //
 class QueryBuilder{
     constructor(){
         this.query = "";
@@ -375,3 +434,4 @@ class QueryBuilder{
         return this.query;
     }
 }
+// ------------------------------------------------------------------------------------- //

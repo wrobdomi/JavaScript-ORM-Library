@@ -1,6 +1,11 @@
-// User defined class
+// *** Client classes file
 
-// Single object example
+// *** These are sample classes that client can define 
+// in order to save them in db
+
+
+// -- Single object example -- -- -- -- -- -- -- -- -- -- -- -- -- //
+// Description: Client saves single object in db
 // Person < ---- > Database
 class Person {
     constructor(id, name, age){
@@ -9,9 +14,14 @@ class Person {
         this.age = age;
     }
 }
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-// OneToOne relation example
-// Every Student has one StudentCard
+
+
+
+// -- OneToOne relation example  -- -- -- -- -- -- -- -- -- -- -- -- -- //
+// Description: Every Student has one StudentCard, client saves one student and one 
+// student card at the same time
 // Student, StudentCard < ----- > Database
 
 class Student {
@@ -31,10 +41,15 @@ class StudentCard {
         this.faculty = faculty;
     }
 }
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 
-// OneToMany relation example
-// Every Country has one or more cities
+
+
+
+// -- OneToMany relation example -- -- -- -- -- -- -- -- -- -- -- -- -- //
+// Description: Every Country has one or more cities, client saves one country
+// and many cities at the same time
 
 class Country {
     constructor(id, name, cities){
@@ -52,3 +67,5 @@ class City {
         this.numberOfPeople = numberOfPeople;
     }
 }
+
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

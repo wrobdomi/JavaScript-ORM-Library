@@ -14,67 +14,96 @@
 
 <script>
     
-	alasql("CREATE TABLE people (person_id number, person_name string, person_age number)");
-        
-	alasql("INSERT INTO people VALUES (1, 'Jenny', 21), (2, 'Nick', 71), (3, 'James', 30)");
-
-
-	var queryResult1 = alasql("SELECT * FROM people WHERE person_age < 50");
-   
-   // queryResults now contains this array of objects
-    console.log(queryResult1);
-
+    var clientLog = 'color: #e6441c; font-size: 20px;';
+    var codeSnippet = 'color: #57a832; font-size: 14px;';
+    var objArr = 'font-size: 14px;';
 
     // TESTING SINGLE OBJECT
-    // class: Person --- maps to database table ---> people
-    // property: id --- maps to database column ----> id
+    // create new meta DataMap:
+    // class: Person  --- maps to database table  ---> people
+    // property: id   --- maps to database column ----> id
     // property: name --- maps to database column ----> person_name
-    // property: age --- maps to database column ----> person_age
-    var person1 = new Person(4, 'John', 26);
+    // property: age  --- maps to database column ----> person_age
+    console.log('%c CLIENT-LOG: Client creates DataMap for his class...', clientLog);
+    
+    var person1 = new Person(1, 'John', 26);
     var personDataMap = new MetaDataMap('Person', 'people');
-    personDataMap.addColumn(new ColumnMap('id', 'person_id'));
-    personDataMap.addColumn(new ColumnMap('name', 'person_name'));
-    personDataMap.addColumn(new ColumnMap('age', 'person_age'));
+    personDataMap.addColumn(new ColumnMap('id', 'person_id', 'number'));
+    personDataMap.addColumn(new ColumnMap('name', 'person_name', 'string'));
+    personDataMap.addColumn(new ColumnMap('age', 'person_age', 'number'));
+
 
     // create new DataMapper
+    console.log('%c CLIENT-LOG: Client creates new DataMapper...', clientLog);
     var dataMapper = new DataMapper();
     // register MetaDataMapping object
+    console.log('%c CLIENT-LOG: Client registers his DataMap in DataMapper...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + 'dataMapper.registerMetaDataMap("Person", personDataMap);', codeSnippet);
     dataMapper.registerMetaDataMap("Person", personDataMap);
     
     
+    
     // ^*^*^* save object in DB
+    console.log('%c CLIENT-LOG: Client saves his object in db...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + 'dataMapper.save(person1);', codeSnippet);
     dataMapper.save(person1);
     
+
+    // ^*^*^* save some more objects
+    console.log('%c CLIENT-LOG: Client saves more objects in db...', clientLog);
+    var person2 = new Person(2, 'Mary', 21);
+    dataMapper.save(person2);
+    var person3 = new Person(3, 'Gregor', 19);
+    dataMapper.save(person3);
+    var person4 = new Person(4, 'Alice', 31);
+    dataMapper.save(person4);
     
+
     // ^*^*^* get all people from DB
+    console.log('%c CLIENT-LOG: Client gets all object from db by passing his class...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + '   allPeople1 = dataMapper.getAll("Person");', codeSnippet);
     allPeople1 = dataMapper.getAll("Person");
+    console.log('%c CLIENT-LOG: Client gets objects array:', clientLog);
     console.log(allPeople1);
 
 
     // ^*^*^* get specific person from DB
+    console.log('%c CLIENT-LOG: Client gets specific person from db by query object...', clientLog);
     var qo1 = new QueryObject();
     qo1.setMetaDataMapping(personDataMap);
     qo1.addCriteria(new Criteria('=', 'name', 'John'));
     qo1.addCriteria(new Criteria('<', 'age', 50));
+    console.log('%c CODE-SNIPPET: ' + '   qo1.addCriteria(new Criteria(\'=\', \'name\', \'John\'));', codeSnippet);
+    console.log('%c CODE-SNIPPET: ' + '   qo1.addCriteria(new Criteria(\'<\', \'age\', 50));', codeSnippet);
     
     var specificPeople1 = dataMapper.getByCriteria("Person", qo1);
+    console.log('%c CODE-SNIPPET: ' + '   var specificPeople1 = dataMapper.getByCriteria("Person", qo1);', codeSnippet);
     console.log(specificPeople1);
 
     // ^*^*^* update 
+    console.log('%c CLIENT-LOG: Client update specific person in db by query object', clientLog);
     var qo2 = new QueryObject();
     qo2.setMetaDataMapping(personDataMap);
+    console.log('%c CODE-SNIPPET: ' + '   qo2.addCriteria(new Criteria(\'LIKE\', \'name\', \'J%\'));', codeSnippet);
+    console.log('%c CODE-SNIPPET: ' + '   dataMapper.update("Person", qo2, [\'age\'], [20]);', codeSnippet);
     qo2.addCriteria(new Criteria('LIKE', 'name', 'J%'));
     dataMapper.update("Person", qo2, ['age'], [20]);
     
+    console.log('%c CLIENT-LOG: Client checks update...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + '   var updateResult = dataMapper.getByCriteria("Person", qo2);', codeSnippet);
     var updateResult = dataMapper.getByCriteria("Person", qo2);
     console.log(updateResult);
 
     // ^*^*^* delete
+    console.log('%c CLIENT-LOG: Client deletes record...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + '   qo3.addCriteria(new Criteria(\'LIKE\', \'name\', \'M%\'));', codeSnippet);
     var qo3 = new QueryObject();
     qo3.setMetaDataMapping(personDataMap);
-    qo3.addCriteria(new Criteria('LIKE', 'name', 'N%'));
+    qo3.addCriteria(new Criteria('LIKE', 'name', 'M%'));
     dataMapper.delete("Person", qo3);
     
+    console.log('%c CLIENT-LOG: Client checks delete...', clientLog);
+    console.log('%c CODE-SNIPPET: ' + '   var deleteResult = dataMapper.getAll("Person");;', codeSnippet);
     var deleteResult = dataMapper.getAll("Person");
     console.log(deleteResult);
 

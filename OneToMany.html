@@ -14,42 +14,61 @@
 
 <script>
     
-	alasql('CREATE TABLE countries ( country_id number PRIMARY KEY, country_name string)');
-    alasql("CREATE TABLE cities (country_id number REFERENCES countries(country_id), city_id number PRIMARY KEY, city_name string, people number)");
+// 	alasql('CREATE TABLE countries ( country_id number PRIMARY KEY, country_name string)');
+//     alasql("CREATE TABLE cities (country_id number REFERENCES countries(country_id), city_id number PRIMARY KEY, city_name string, people number)");
 
-	alasql("INSERT INTO countries VALUES (1, 'Poland'), (2, 'UK'), (3, 'Germany')");
-    alasql("INSERT INTO cities VALUES (1, 1, 'Krakow', 350000), (1, 2, 'Warszawa', 500000)");
-    alasql("INSERT INTO cities VALUES (2, 3, 'London', 3000000), (2, 4, 'Reading', 250000)");
-    alasql("INSERT INTO cities VALUES (3, 5, 'Berlin', 2000000), (3, 6, 'Munich', 500000)");
+// 	alasql("INSERT INTO countries VALUES (1, 'Poland'), (2, 'UK'), (3, 'Germany')");
+//     alasql("INSERT INTO cities VALUES (1, 1, 'Krakow', 350000), (1, 2, 'Warszawa', 500000)");
+//     alasql("INSERT INTO cities VALUES (2, 3, 'London', 3000000), (2, 4, 'Reading', 250000)");
+//     alasql("INSERT INTO cities VALUES (3, 5, 'Berlin', 2000000), (3, 6, 'Munich', 500000)");
 
 
-	var queryResult1 = alasql("SELECT * FROM countries NATURAL JOIN cities");
+// 	var queryResult1 = alasql("SELECT * FROM countries NATURAL JOIN cities");
    
-   // queryResults now contains this array of objects
-    console.log(queryResult1);
+//    // queryResults now contains this array of objects
+//     console.log(queryResult1);
 
 
     // // TESTING ONE TO ONE RELATION
+    var city1 = new City(1, 1, 'Krakow', 350000);
+    var city2 = new City(1, 2, 'Warszawa', 500000);
+    var city3 = new City(2, 3, 'London', 3000000);
+    var city4 = new City(2, 4, 'Reading', 250000);
+    var city5 = new City(3, 5, 'Berlin', 2000000);
+    var city6 = new City(3, 6, 'Munich', 500000);
     var city7 = new City(4, 7, 'New York', 8000000);
     var city8 = new City(4, 8, 'Chicago', 3500000);
     var city9 = new City(4, 9, 'San Francisco', 2000000);
+    var citiesOfPoland = new Array();
+    citiesOfPoland.push(city1);
+    citiesOfPoland.push(city2);
+    var citiesOfUK = new Array();
+    citiesOfUK.push(city3);
+    citiesOfUK.push(city4);
+    var citiesOfGermany = new Array();
+    citiesOfGermany.push(city5);
+    citiesOfGermany.push(city6);
     var citiesOfUSA = new Array();
     citiesOfUSA.push(city7);
     citiesOfUSA.push(city8);
     citiesOfUSA.push(city9);
+    var countryPoland = new Country(1, 'Poland', citiesOfPoland);
+    var countryUK = new Country(2, 'UK', citiesOfUK);
+    var countryGermany = new Country(3, 'Germany', citiesOfGermany);
     var countryUSA = new Country(4, 'USA', citiesOfUSA);
+    
 
     // configure meta data for fields and columns
     var countriesDataMap = new MetaDataMap('Country', 'countries');
-    countriesDataMap.addColumn(new ColumnMap('id', 'country_id'));
-    countriesDataMap.addColumn(new ColumnMap('name', 'country_name'));
+    countriesDataMap.addColumn(new ColumnMap('id', 'country_id', 'number'));
+    countriesDataMap.addColumn(new ColumnMap('name', 'country_name', 'string'));
 
 
     var citiesDataMap = new MetaDataMap('City', 'cities');
-    citiesDataMap.addColumn(new ColumnMap('countryId', 'country_id'));
-    citiesDataMap.addColumn(new ColumnMap('cityId', 'city_id'));
-    citiesDataMap.addColumn(new ColumnMap('name', 'city_name'));
-    citiesDataMap.addColumn(new ColumnMap('numberOfPeople', 'people'));
+    citiesDataMap.addColumn(new ColumnMap('countryId', 'country_id', 'number'));
+    citiesDataMap.addColumn(new ColumnMap('cityId', 'city_id', 'number'));
+    citiesDataMap.addColumn(new ColumnMap('name', 'city_name', 'string'));
+    citiesDataMap.addColumn(new ColumnMap('numberOfPeople', 'people', 'number'));
 
     // configure meta data for relations
     countriesDataMap.addRelation(new Relation('OneToMany', 'cities', 'City', 'countryId', 'id'));
@@ -62,6 +81,9 @@
     
     
     // ^*^*^* save object in DB
+    dataMapper.save(countryPoland);
+    dataMapper.save(countryUK);
+    dataMapper.save(countryGermany);
     dataMapper.save(countryUSA);
     
     var result3 = alasql("SELECT * FROM countries NATURAL JOIN cities");

@@ -1,12 +1,16 @@
 # JavaScript-ORM-Library
 JS ORM library built with design patterns: MetaDataMapping, DataMapper, QueryObject.
 
+Library file: metamap.js
+
 # Technologies
   + JavaScript ES6
   + AlaSQL.js
   
 # Code sample
   + Single object
+  
+    ![01](https://user-images.githubusercontent.com/37666186/73739556-bd73ff00-4746-11ea-8db0-ed19381827c8.PNG)
     - Create person and configure metadata
     ```javascript
       var person1 = new Person(1, 'John', 26);

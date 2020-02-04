@@ -166,7 +166,7 @@ Library file: metamap.js
     dataMapper.registerMetaDataMap("City", citiesDataMap);
     ``` 
     
-    - Save counry and all its cities in two different tables
+    - Save country and all its cities in two different tables
     ```javascript
     // ^*^*^* save object in DB
     dataMapper.save(countryPoland);
